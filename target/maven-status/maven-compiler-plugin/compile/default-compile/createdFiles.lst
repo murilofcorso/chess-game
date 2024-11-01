@@ -1,0 +1,13 @@
+com\mycompany\chess\pieces\Bishop.class
+com\mycompany\chess\pieces\King.class
+com\mycompany\chess\ChessGame$1.class
+com\mycompany\chess\board\Square.class
+com\mycompany\chess\ChessBoard.class
+com\mycompany\chess\board\Board.class
+com\mycompany\chess\pieces\Knight.class
+com\mycompany\chess\utils\Utils.class
+com\mycompany\chess\pieces\Rook.class
+com\mycompany\chess\pieces\Pawn.class
+com\mycompany\chess\pieces\Queen.class
+com\mycompany\chess\pieces\Piece.class
+com\mycompany\chess\ChessGame.class

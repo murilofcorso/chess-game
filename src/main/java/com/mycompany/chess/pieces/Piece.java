@@ -1,0 +1,32 @@
+package com.mycompany.chess.pieces;
+
+import com.mycompany.chess.utils.Utils;
+import java.awt.Color;
+
+public class Piece {
+
+    public final String squareNotation;
+    public final Color color;
+    public final int id;
+    private final int row;
+    private final int col;
+    public boolean beingDragged;
+    
+    public Piece(String squareNotation, Color color, int id) {
+        this.squareNotation = squareNotation;
+        int[] pos = Utils.convertFromChessNotation(squareNotation);
+        this.row = pos[0];
+        this.col = pos[1];
+        this.color = color;
+        this.id = id;
+        this.beingDragged = false;
+    }
+    
+    public int getRow() {
+        return row;
+    }
+    
+    public int getCol() {
+        return col;
+    }
+}
