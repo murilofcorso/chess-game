@@ -1,6 +1,8 @@
 package com.mycompany.chess;
 
 import com.mycompany.chess.board.Square;
+import com.mycompany.chess.pieces.Bishop;
+import com.mycompany.chess.pieces.Pawn;
 import com.mycompany.chess.pieces.Piece;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -9,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import com.mycompany.chess.utils.Utils;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 
 public class ChessBoard extends JPanel implements MouseListener, MouseMotionListener{
@@ -89,6 +92,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
             activePiece = p;
             p.beingDragged = true;
         }
+        System.out.println(getPossibleMoves((Pawn) activePiece));
     }
 
     @Override
@@ -116,14 +120,62 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         int oldRow = activePiece.getRow();
         int oldCol = activePiece.getCol();
         
-        if(board[row][col].isEmpty()) {
+        if(getPossibleMoves((Pawn) activePiece).contains(board[row][col])) {
+            board[row][col].setPiece(activePiece);
+            activePiece.move(row, col);
+            board[oldRow][oldCol].setPiece(null);
+        }
+        
+        if(getPossibleMoves((Bishop) activePiece).contains(board[row][col])) {
             board[row][col].setPiece(activePiece);
             activePiece.move(row, col);
             board[oldRow][oldCol].setPiece(null);
         }
 
         repaint();
-    }   
+    }
+    
+    public ArrayList<Square> getPossibleMoves(Pawn pawn) {
+        ArrayList<Square> moves = new ArrayList<>();
+        int direction = pawn.isWhite() ? -1 : 1;
+        int row = pawn.getRow();
+        int col = pawn.getCol();
+        
+        if(board[row + direction][col].isEmpty()) {
+            moves.add(board[row + direction][col]);
+            
+            if(pawn.isWhite() && row == 6 || !pawn.isWhite() && row == 1) {
+                if(board[row + 2 * direction][col].isEmpty()) {
+                    moves.add(board[row + 2 * direction][col]);
+                }
+            }
+        }
+        // Captura diagonal à esquerda
+        if (col > 0 && isOpponentPiece(row + direction, col - 1, pawn.isWhite())) {
+            moves.add(board[row + direction][col - 1]);
+        }
+
+        // Captura diagonal à direita
+        if (col < 7 && isOpponentPiece(row + direction, col + 1, pawn.isWhite())) {
+            moves.add(board[row + direction][col + 1]);
+        }
+        
+        return moves;
+    }
+    
+    public ArrayList<Square> getPossibleMoves(Bishop bishop) {
+        ArrayList<Square> moves = new ArrayList<>();
+        
+        
+        
+        return moves;
+    }
+    
+    private boolean isOpponentPiece(int row, int col, boolean isWhite) {
+        // Verifique se a posição contém uma peça adversária
+        Piece piece = (Piece) board[row][col].getPiece();
+        return piece != null && piece.isWhite() != isWhite;
+    }
 
     @Override
     public void mouseClicked(MouseEvent e) {

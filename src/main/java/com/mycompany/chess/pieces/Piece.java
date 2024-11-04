@@ -34,4 +34,8 @@ public class Piece {
         this.row = row;
         this.col = col;
     }
+    
+    public boolean isWhite() {
+        return color == Color.WHITE;
+    }
 }
