@@ -2,6 +2,7 @@ package com.mycompany.chess;
 
 import com.mycompany.chess.board.Square;
 import com.mycompany.chess.pieces.Bishop;
+import com.mycompany.chess.pieces.Knight;
 import com.mycompany.chess.pieces.Pawn;
 import com.mycompany.chess.pieces.Piece;
 import java.awt.Color;
@@ -131,6 +132,11 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
                 movePiece(activePiece, notationOld, notationNew);
             }
         }
+        else if(activePiece instanceof Knight knight) {
+            if(getKnightMoves(knight).contains(board[newRow][newCol])) {
+                movePiece(activePiece, notationOld, notationNew);
+            }
+        }
         
         repaint();
     }
@@ -183,6 +189,30 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return moves;
     }
     
+    private ArrayList<Square> getKnightMoves(Knight knight) {
+        ArrayList<Square> moves = new ArrayList<>();
+        int row = knight.getRow();
+        int col = knight.getCol();
+        Piece p = Utils.getPiece(board, row, col);
+        
+        int[][] knightMoves = {
+            {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+            {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+        };
+        
+        for(int[] move: knightMoves) {
+            int newRow = row + move[0];
+            int newCol = col + move[1];
+            if(isWhithinBounds(newRow, newCol)) {
+                if(board[newRow][newCol].isEmpty() || isOpponentPiece(newRow, newCol, p.isWhite())) {
+                    moves.add(board[newRow][newCol]);
+                }
+            }
+        }
+        
+        return moves;
+    }
+    
     private boolean isOpponentPiece(int row, int col, boolean isWhite) {
         // Verifique se a posição contém uma peça adversária
         Piece piece = (Piece) board[row][col].getPiece();
@@ -190,7 +220,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     }
 
     private void addDiagonal(ArrayList<Square> list, int row, int col, int rowIncrement, int colIncrement) {
-        Piece p = (Piece) board[row][col].getPiece();
+        Piece p = Utils.getPiece(board, row, col);
         
         int newRow = row + rowIncrement;
         int newCol = col + colIncrement;
