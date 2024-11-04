@@ -92,7 +92,6 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
             activePiece = p;
             p.beingDragged = true;
         }
-        System.out.println(getPossibleMoves((Pawn) activePiece));
     }
 
     @Override
@@ -113,29 +112,39 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     @Override
     public void mouseReleased(MouseEvent e) {
         activePiece.beingDragged = false;
-        
-        int row = e.getY()/tileSize;
-        int col = e.getX()/tileSize;
-        
         int oldRow = activePiece.getRow();
         int oldCol = activePiece.getCol();
+        String notationOld = Utils.convertToChessNotation(oldRow, oldCol);
         
-        if(getPossibleMoves((Pawn) activePiece).contains(board[row][col])) {
-            board[row][col].setPiece(activePiece);
-            activePiece.move(row, col);
-            board[oldRow][oldCol].setPiece(null);
+        int newRow = e.getY()/tileSize;
+        int newCol = e.getX()/tileSize;
+        String notationNew = Utils.convertToChessNotation(newRow, newCol);
+        
+        
+        if(activePiece instanceof Pawn pawn) {
+            if(getPawnMoves(pawn).contains(board[newRow][newCol])) {
+                movePiece(activePiece, notationOld, notationNew);
+            }
+        } 
+        else if(activePiece instanceof Bishop bishop) {
+            if(getBishopMoves(bishop).contains(board[newRow][newCol])) {
+                movePiece(activePiece, notationOld, notationNew);
+            }
         }
         
-        if(getPossibleMoves((Bishop) activePiece).contains(board[row][col])) {
-            board[row][col].setPiece(activePiece);
-            activePiece.move(row, col);
-            board[oldRow][oldCol].setPiece(null);
-        }
-
         repaint();
     }
     
-    public ArrayList<Square> getPossibleMoves(Pawn pawn) {
+    public void movePiece(Piece p, String notationOld, String notationNew) {
+        int[] posOld = Utils.convertFromChessNotation(notationOld);
+        int[] posNew = Utils.convertFromChessNotation(notationNew);
+        
+        board[posOld[0]][posOld[1]].setPiece(null);
+        board[posNew[0]][posNew[1]].setPiece(activePiece);
+        activePiece.move(posNew[0], posNew[1]);    
+    }
+    
+    public ArrayList<Square> getPawnMoves(Pawn pawn) {
         ArrayList<Square> moves = new ArrayList<>();
         int direction = pawn.isWhite() ? -1 : 1;
         int row = pawn.getRow();
@@ -163,10 +172,13 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return moves;
     }
     
-    public ArrayList<Square> getPossibleMoves(Bishop bishop) {
+    public ArrayList<Square> getBishopMoves(Bishop bishop) {
         ArrayList<Square> moves = new ArrayList<>();
         
-        
+        addDiagonal(moves, bishop.getRow(), bishop.getCol(), -1, -1);
+        addDiagonal(moves, bishop.getRow(), bishop.getCol(), 1, -1);
+        addDiagonal(moves, bishop.getRow(), bishop.getCol(), -1, 1);
+        addDiagonal(moves, bishop.getRow(), bishop.getCol(), 1, 1); 
         
         return moves;
     }
@@ -177,6 +189,64 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return piece != null && piece.isWhite() != isWhite;
     }
 
+    private void addDiagonal(ArrayList<Square> list, int row, int col, int rowIncrement, int colIncrement) {
+        Piece p = (Piece) board[row][col].getPiece();
+        
+        int newRow = row + rowIncrement;
+        int newCol = col + colIncrement;
+        
+        while(isWhithinBounds(newRow, newCol)) {
+            if(board[newRow][newCol].isEmpty()) {
+                list.add(board[newRow][newCol]);
+            } else {
+                if(isOpponentPiece(newRow, newCol, p.isWhite())) {
+                    list.add(board[newRow][newCol]);
+                }
+                break;
+            }
+            newRow += rowIncrement;
+            newCol += colIncrement;
+        }
+    }
+    
+    private boolean isWhithinBounds(int newRow, int newCol) {
+        return (newRow >= 0 && newRow < 8) && (newCol >= 0 && newCol < 8);
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     @Override
     public void mouseClicked(MouseEvent e) {
         
