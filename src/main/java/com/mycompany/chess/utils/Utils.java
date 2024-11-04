@@ -20,10 +20,10 @@ public class Utils {
         int[] pos = new int[2];
 
         // Coluna: converte a letra (a-h) para um número (0-7)
-        pos[0] = notation.charAt(0) - 'a';
+        pos[1] = notation.charAt(0) - 'a';
 
         // Linha: converte o número (1-8) para um índice (7-0)
-        pos[1] = 8 - Character.getNumericValue(notation.charAt(1));
+        pos[0] = 8 - Character.getNumericValue(notation.charAt(1));
 
         return pos;
     }

@@ -8,8 +8,8 @@ public class Piece {
     public final String squareNotation;
     public final Color color;
     public final int id;
-    private final int row;
-    private final int col;
+    private int row;
+    private int col;
     public boolean beingDragged;
     
     public Piece(String squareNotation, Color color, int id) {
@@ -28,5 +28,10 @@ public class Piece {
     
     public int getCol() {
         return col;
+    }
+    
+    public void move(int row, int col) {
+        this.row = row;
+        this.col = col;
     }
 }

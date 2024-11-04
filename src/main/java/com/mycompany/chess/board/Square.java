@@ -23,4 +23,8 @@ public class Square {
     public Object getPiece() {
         return piece;
     }
+    
+    public boolean isEmpty() {
+        return piece == null;
+    }
 }

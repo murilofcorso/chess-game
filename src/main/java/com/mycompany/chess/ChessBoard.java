@@ -17,7 +17,6 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     private final int tileSize = 100;
     
     private int mouseX, mouseY;
-    private boolean dragging = false;
     
     private Piece activePiece;
     private int piecePosX;
@@ -70,7 +69,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
                     if(p.beingDragged == true) {
                         drawPiece(g, p, piecePosX, piecePosY);
                     } else {
-                        drawPiece(g, p, x, y);
+                        drawPiece(g, p, y, x);
                     }
                 }
             }
@@ -94,7 +93,6 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        dragging = true;
         mouseY = e.getY();
         mouseX = e.getX();
         
@@ -110,8 +108,20 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     
     @Override
     public void mouseReleased(MouseEvent e) {
-        dragging = false;
         activePiece.beingDragged = false;
+        
+        int row = e.getY()/tileSize;
+        int col = e.getX()/tileSize;
+        
+        int oldRow = activePiece.getRow();
+        int oldCol = activePiece.getCol();
+        
+        if(board[row][col].isEmpty()) {
+            board[row][col].setPiece(activePiece);
+            activePiece.move(row, col);
+            board[oldRow][oldCol].setPiece(null);
+        }
+
         repaint();
     }   
 

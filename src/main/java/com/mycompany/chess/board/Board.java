@@ -4,6 +4,7 @@ import com.mycompany.chess.pieces.Bishop;
 import com.mycompany.chess.pieces.King;
 import com.mycompany.chess.pieces.Knight;
 import com.mycompany.chess.pieces.Pawn;
+import com.mycompany.chess.pieces.Piece;
 import com.mycompany.chess.pieces.Queen;
 import com.mycompany.chess.pieces.Rook;
 import com.mycompany.chess.utils.Utils;
