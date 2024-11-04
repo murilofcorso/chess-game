@@ -5,6 +5,8 @@ import com.mycompany.chess.pieces.Bishop;
 import com.mycompany.chess.pieces.Knight;
 import com.mycompany.chess.pieces.Pawn;
 import com.mycompany.chess.pieces.Piece;
+import com.mycompany.chess.pieces.Queen;
+import com.mycompany.chess.pieces.Rook;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
@@ -137,6 +139,16 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
                 movePiece(activePiece, notationOld, notationNew);
             }
         }
+        else if(activePiece instanceof Rook rook) {
+            if(getRookMoves(rook).contains(board[newRow][newCol])) {
+                movePiece(activePiece, notationOld, notationNew);
+            }
+        }
+        else if(activePiece instanceof Queen queen) {
+            if(getQueenMoves(queen).contains(board[newRow][newCol])) {
+                movePiece(activePiece, notationOld, notationNew);
+            }
+        }
         
         repaint();
     }
@@ -181,10 +193,36 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     public ArrayList<Square> getBishopMoves(Bishop bishop) {
         ArrayList<Square> moves = new ArrayList<>();
         
-        addDiagonal(moves, bishop.getRow(), bishop.getCol(), -1, -1);
-        addDiagonal(moves, bishop.getRow(), bishop.getCol(), 1, -1);
-        addDiagonal(moves, bishop.getRow(), bishop.getCol(), -1, 1);
-        addDiagonal(moves, bishop.getRow(), bishop.getCol(), 1, 1); 
+        addLinearMoves(moves, bishop.getRow(), bishop.getCol(), -1, -1);
+        addLinearMoves(moves, bishop.getRow(), bishop.getCol(), 1, -1);
+        addLinearMoves(moves, bishop.getRow(), bishop.getCol(), -1, 1);
+        addLinearMoves(moves, bishop.getRow(), bishop.getCol(), 1, 1); 
+        
+        return moves;
+    }
+    
+    public ArrayList<Square> getRookMoves(Rook rook) {
+        ArrayList<Square> moves = new ArrayList<>();
+        
+        addLinearMoves(moves, rook.getRow(), rook.getCol(), -1, 0);
+        addLinearMoves(moves, rook.getRow(), rook.getCol(), 0, -1);
+        addLinearMoves(moves, rook.getRow(), rook.getCol(), 0, 1);
+        addLinearMoves(moves, rook.getRow(), rook.getCol(), 1, 0); 
+        
+        return moves;
+    }
+    
+    public ArrayList<Square> getQueenMoves(Queen queen) {
+        ArrayList<Square> moves = new ArrayList<>();
+        
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), -1, 0);
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), 0, -1);
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), 0, 1);
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), 1, 0);
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), -1, -1);
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), 1, -1);
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), -1, 1);
+        addLinearMoves(moves, queen.getRow(), queen.getCol(), 1, 1); 
         
         return moves;
     }
@@ -219,7 +257,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return piece != null && piece.isWhite() != isWhite;
     }
 
-    private void addDiagonal(ArrayList<Square> list, int row, int col, int rowIncrement, int colIncrement) {
+    private void addLinearMoves(ArrayList<Square> list, int row, int col, int rowIncrement, int colIncrement) {
         Piece p = Utils.getPiece(board, row, col);
         
         int newRow = row + rowIncrement;
@@ -237,6 +275,10 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
             newRow += rowIncrement;
             newCol += colIncrement;
         }
+    }
+    
+    private void adLine(ArrayList<Square> list, int row, int col, int rowIncrement, int colIncrement) {
+
     }
     
     private boolean isWhithinBounds(int newRow, int newCol) {
