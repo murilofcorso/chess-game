@@ -2,6 +2,7 @@ package com.mycompany.chess;
 
 import com.mycompany.chess.board.Square;
 import com.mycompany.chess.pieces.Bishop;
+import com.mycompany.chess.pieces.King;
 import com.mycompany.chess.pieces.Knight;
 import com.mycompany.chess.pieces.Pawn;
 import com.mycompany.chess.pieces.Piece;
@@ -124,29 +125,38 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         String notationNew = Utils.convertToChessNotation(newRow, newCol);
         
         
-        if(activePiece instanceof Pawn pawn) {
-            if(getPawnMoves(pawn).contains(board[newRow][newCol])) {
-                movePiece(activePiece, notationOld, notationNew);
+        switch (activePiece) {
+            case Pawn pawn -> {
+                if(getPawnMoves(pawn).contains(board[newRow][newCol])) {
+                    movePiece(activePiece, notationOld, notationNew);
+                }
             }
-        } 
-        else if(activePiece instanceof Bishop bishop) {
-            if(getBishopMoves(bishop).contains(board[newRow][newCol])) {
-                movePiece(activePiece, notationOld, notationNew);
+            case Bishop bishop -> {
+                if(getBishopMoves(bishop).contains(board[newRow][newCol])) {
+                    movePiece(activePiece, notationOld, notationNew);
+                }
             }
-        }
-        else if(activePiece instanceof Knight knight) {
-            if(getKnightMoves(knight).contains(board[newRow][newCol])) {
-                movePiece(activePiece, notationOld, notationNew);
+            case Knight knight -> {
+                if(getKnightMoves(knight).contains(board[newRow][newCol])) {
+                    movePiece(activePiece, notationOld, notationNew);
+                }
             }
-        }
-        else if(activePiece instanceof Rook rook) {
-            if(getRookMoves(rook).contains(board[newRow][newCol])) {
-                movePiece(activePiece, notationOld, notationNew);
+            case Rook rook -> {
+                if(getRookMoves(rook).contains(board[newRow][newCol])) {
+                    movePiece(activePiece, notationOld, notationNew);
+                }
             }
-        }
-        else if(activePiece instanceof Queen queen) {
-            if(getQueenMoves(queen).contains(board[newRow][newCol])) {
-                movePiece(activePiece, notationOld, notationNew);
+            case Queen queen -> {
+                if(getQueenMoves(queen).contains(board[newRow][newCol])) {
+                    movePiece(activePiece, notationOld, notationNew);
+                }
+            }
+            case King king -> {
+                if(getKingMoves(king).contains(board[newRow][newCol])) {
+                    movePiece(activePiece, notationOld, notationNew);
+                }
+            }
+            default -> {
             }
         }
         
@@ -227,6 +237,31 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return moves;
     }
     
+    
+    private ArrayList<Square> getKingMoves(King king) {
+        ArrayList<Square> moves = new ArrayList<>();
+        int row = king.getRow();
+        int col = king.getCol();
+        Piece p = Utils.getPiece(board, row, col);
+        
+        int[][] kingMoves = {
+            {0, -1}, {-1, -1}, {-1, 0}, {-1, 1}, 
+            {0, 1}, {1, 1}, {1, 0}, {1, -1}
+        };
+        
+        for(int[] move: kingMoves) {
+            int newRow = row + move[0];
+            int newCol = col + move[1];
+            if(isWhithinBounds(newRow, newCol)) {
+                if(board[newRow][newCol].isEmpty() || isOpponentPiece(newRow, newCol, p.isWhite())) {
+                    moves.add(board[newRow][newCol]);
+                }
+            }
+        }
+        
+        return moves;
+    }
+    
     private ArrayList<Square> getKnightMoves(Knight knight) {
         ArrayList<Square> moves = new ArrayList<>();
         int row = knight.getRow();
@@ -275,10 +310,6 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
             newRow += rowIncrement;
             newCol += colIncrement;
         }
-    }
-    
-    private void adLine(ArrayList<Square> list, int row, int col, int rowIncrement, int colIncrement) {
-
     }
     
     private boolean isWhithinBounds(int newRow, int newCol) {
