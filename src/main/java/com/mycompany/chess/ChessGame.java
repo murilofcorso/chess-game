@@ -2,7 +2,6 @@ package com.mycompany.chess;
 
 import com.mycompany.chess.board.Board;
 import com.mycompany.chess.pieces.Piece;
-import com.mycompany.chess.utils.Utils;
 import javax.swing.JFrame;
 
 public class ChessGame {

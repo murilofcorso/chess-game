@@ -28,6 +28,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     private Piece activePiece;
     private int piecePosX;
     private int piecePosY;
+    private Color playing = Color.WHITE;
     
     public ChessBoard(Square[][] board) {
         addMouseListener(this);
@@ -73,7 +74,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
                 if(p != null) {
                     x = p.getRow()*tileSize;
                     y = p.getCol()*tileSize;
-                    if(p.beingDragged == true) {
+                    if(p == activePiece) {
                         drawPiece(g, p, piecePosX, piecePosY);
                     } else {
                         drawPiece(g, p, y, x);
@@ -92,9 +93,8 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         int col = mouseX / 100;
         
         Piece p = Utils.getPiece(board, row, col);
-        if(p != null) {
+        if(p != null && p.color == playing) {
             activePiece = p;
-            p.beingDragged = true;
         }
     }
 
@@ -115,9 +115,17 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     
     @Override
     public void mouseReleased(MouseEvent e) {
-        activePiece.beingDragged = false;
-        int oldRow = activePiece.getRow();
-        int oldCol = activePiece.getCol();
+        if(activePiece != null) {
+            checkMoves(e, activePiece);
+        }
+        
+        
+        activePiece = null;
+    }
+    
+    private void checkMoves(MouseEvent e, Piece p) {
+        int oldRow = p.getRow();
+        int oldCol = p.getCol();
         String notationOld = Utils.convertToChessNotation(oldRow, oldCol);
         
         int newRow = e.getY()/tileSize;
@@ -125,38 +133,38 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         String notationNew = Utils.convertToChessNotation(newRow, newCol);
         
         
-        switch (activePiece) {
+        switch (p) {
             case Pawn pawn -> {
                 if(getPawnMoves(pawn).contains(board[newRow][newCol])) {
-                    movePiece(activePiece, notationOld, notationNew);
+                    movePiece(p, notationOld, notationNew);
                 }
             }
             case Bishop bishop -> {
                 if(getBishopMoves(bishop).contains(board[newRow][newCol])) {
-                    movePiece(activePiece, notationOld, notationNew);
+                    movePiece(p, notationOld, notationNew);
                 }
             }
             case Knight knight -> {
                 if(getKnightMoves(knight).contains(board[newRow][newCol])) {
-                    movePiece(activePiece, notationOld, notationNew);
+                    movePiece(p, notationOld, notationNew);
                 }
             }
             case Rook rook -> {
                 if(getRookMoves(rook).contains(board[newRow][newCol])) {
-                    movePiece(activePiece, notationOld, notationNew);
+                    movePiece(p, notationOld, notationNew);
                 }
             }
             case Queen queen -> {
                 if(getQueenMoves(queen).contains(board[newRow][newCol])) {
-                    movePiece(activePiece, notationOld, notationNew);
+                    movePiece(p, notationOld, notationNew);
                 }
             }
             case King king -> {
                 if(getKingMoves(king).contains(board[newRow][newCol])) {
-                    movePiece(activePiece, notationOld, notationNew);
+                    movePiece(p, notationOld, notationNew);
                 }
             }
-            default -> {
+            default -> {   
             }
         }
         
@@ -169,7 +177,9 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         
         board[posOld[0]][posOld[1]].setPiece(null);
         board[posNew[0]][posNew[1]].setPiece(activePiece);
-        activePiece.move(posNew[0], posNew[1]);    
+        activePiece.move(posNew[0], posNew[1]);
+        
+        playing = activePiece.isWhite() ? Color.BLACK: Color.WHITE;
     }
     
     public ArrayList<Square> getPawnMoves(Pawn pawn) {
@@ -236,7 +246,6 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         
         return moves;
     }
-    
     
     private ArrayList<Square> getKingMoves(King king) {
         ArrayList<Square> moves = new ArrayList<>();
@@ -352,7 +361,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     
     @Override
     public void mouseClicked(MouseEvent e) {
-        
+
     }
 
     @Override

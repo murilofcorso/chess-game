@@ -10,7 +10,6 @@ public class Piece {
     public final int id;
     private int row;
     private int col;
-    public boolean beingDragged;
     
     public Piece(String squareNotation, Color color, int id) {
         this.squareNotation = squareNotation;
@@ -19,7 +18,6 @@ public class Piece {
         this.col = pos[1];
         this.color = color;
         this.id = id;
-        this.beingDragged = false;
     }
     
     public int getRow() {
