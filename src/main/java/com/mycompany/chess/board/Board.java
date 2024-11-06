@@ -65,9 +65,9 @@ public final class Board{
     }
     
     private void createPieces() {
-        createPawns();
-        createBishops();
-        createKnights();
+//        createPawns();
+//        createBishops();
+//        createKnights();
         createRooks();
         board[0][3].setPiece(new Queen("d8", black, 2));
         board[7][3].setPiece(new Queen("d1", white, 2));

@@ -95,7 +95,6 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         if(p != null && p.color == playingColor) {
             activePiece = p;
         }
-        System.out.println(isSquareUnderAttack(row, col));
     }
 
     @Override
@@ -163,6 +162,17 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
                 if(getKingMoves(king).contains(board[newRow][newCol])) {
                     movePiece(p, notationOld, notationNew);
                 }
+                if(newCol - oldCol == 2 && canCastleKingSide(king)) {
+                    movePiece(p, new int[]{oldRow, oldCol}, new int[]{newRow, newCol});
+                    Rook rook = (Rook) Utils.getPiece(board, newRow, 7);
+                    movePiece(rook, new int[] {rook.getRow(), rook.getCol()}, new int[] {rook.getRow(), rook.getCol()-2});
+                    
+                }
+                if(oldCol - newCol == 2 && canCastleQueenSide(king)) {
+                    movePiece(p, new int[]{oldRow, oldCol}, new int[]{newRow, newCol});
+                    Rook rook = (Rook) Utils.getPiece(board, newRow, 0);
+                    movePiece(rook, new int[] {rook.getRow(), rook.getCol()}, new int[] {rook.getRow(), rook.getCol()+3});
+                }
             }
             default -> {   
             }
@@ -176,12 +186,22 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         int[] posNew = Utils.convertFromChessNotation(notationNew);
         
         board[posOld[0]][posOld[1]].setPiece(null);
-        board[posNew[0]][posNew[1]].setPiece(activePiece);
-        activePiece.move(posNew[0], posNew[1]);
+        board[posNew[0]][posNew[1]].setPiece(p);
+        p.move(posNew[0], posNew[1]);
 
         playingColor = activePiece.isWhite() ? Color.BLACK: Color.WHITE;     
         p.addMove(); 
     }
+    
+    public void movePiece(Piece p, int[] posOld, int[] posNew) {  
+        board[posOld[0]][posOld[1]].setPiece(null);
+        board[posNew[0]][posNew[1]].setPiece(p);
+        p.move(posNew[0], posNew[1]);
+
+        playingColor = activePiece.isWhite() ? Color.BLACK: Color.WHITE;     
+        p.addMove(); 
+    }
+    
     
     public ArrayList<Square> getPawnMoves(Pawn pawn) {
         ArrayList<Square> moves = new ArrayList<>();
@@ -327,33 +347,27 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     }
     
     public boolean canCastleKingSide(King king) {
-        // rei já se moveu?       
-        // tem a torre do rei?
-        // torre já se moveu?
-        if(king.hasMoved() || !canCastleKingSideRook(king)) {
+        int row = king.getRow();
+        int col = king.getCol();
+        if(king.hasMoved() || !canCastleKingSideRook(king) || isSquareUnderAttack(row, col)) {
             return false;
         }      
-        // tem peças no caminho?
-        for(int i = 1; i < 3; i++) {
-            if(!board[king.getRow()][king.getCol()+i].isEmpty()) {
+        for(int i = 1; i < 2; i++) {
+            if(!board[row][col+i].isEmpty() || isSquareUnderAttack(row, col+i)) {
                 return false;
             }
         }
         return true;
-        // trajetória do roque está sendo vigiada
-        // rei está em cheque?
     }
 
     public boolean canCastleQueenSide(King king) {
-        // rei já se moveu?       
-        // tem a torre do rei?
-        // torre já se moveu?
-        if(king.hasMoved() || !canCastleQueenSideRook(king)) {
+        int row = king.getRow();
+        int col = king.getCol();
+        if(king.hasMoved() || !canCastleQueenSideRook(king) || isSquareUnderAttack(row, col)) {
             return false;
         }
-        // tem peças no caminho?
-        for(int i = 1; i < 4; i++) {
-            if(!board[king.getRow()][king.getCol()-i].isEmpty()) {
+        for(int i = 1; i < 3; i++) {
+            if(!board[row][col-i].isEmpty() || isSquareUnderAttack(row, col-i)) {
                 return false;
             }
         }
