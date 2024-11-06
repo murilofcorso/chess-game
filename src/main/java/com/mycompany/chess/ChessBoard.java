@@ -28,7 +28,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     private Piece activePiece;
     private int piecePosX;
     private int piecePosY;
-    private Color playing = Color.WHITE;
+    private Color playingColor = Color.WHITE;
     
     public ChessBoard(Square[][] board) {
         addMouseListener(this);
@@ -92,9 +92,10 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         int col = mouseX / 100;
         
         Piece p = Utils.getPiece(board, row, col);
-        if(p != null && p.color == playing) {
+        if(p != null && p.color == playingColor) {
             activePiece = p;
         }
+        System.out.println(isSquareUnderAttack(row, col));
     }
 
     @Override
@@ -177,9 +178,9 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         board[posOld[0]][posOld[1]].setPiece(null);
         board[posNew[0]][posNew[1]].setPiece(activePiece);
         activePiece.move(posNew[0], posNew[1]);
-        
-        playing = activePiece.isWhite() ? Color.BLACK: Color.WHITE;
-        p.addMove();
+
+        playingColor = activePiece.isWhite() ? Color.BLACK: Color.WHITE;     
+        p.addMove(); 
     }
     
     public ArrayList<Square> getPawnMoves(Pawn pawn) {
@@ -261,7 +262,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         for(int[] move: kingMoves) {
             int newRow = row + move[0];
             int newCol = col + move[1];
-            if(isWhithinBounds(newRow, newCol)) {
+            if(isWithinBounds(newRow, newCol)) {
                 if(board[newRow][newCol].isEmpty() || isOpponentPiece(newRow, newCol, p.isWhite())) {
                     moves.add(board[newRow][newCol]);
                 }
@@ -285,7 +286,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         for(int[] move: knightMoves) {
             int newRow = row + move[0];
             int newCol = col + move[1];
-            if(isWhithinBounds(newRow, newCol)) {
+            if(isWithinBounds(newRow, newCol)) {
                 if(board[newRow][newCol].isEmpty() || isOpponentPiece(newRow, newCol, p.isWhite())) {
                     moves.add(board[newRow][newCol]);
                 }
@@ -307,7 +308,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         int newRow = row + rowIncrement;
         int newCol = col + colIncrement;
         
-        while(isWhithinBounds(newRow, newCol)) {
+        while(isWithinBounds(newRow, newCol)) {
             if(board[newRow][newCol].isEmpty()) {
                 list.add(board[newRow][newCol]);
             } else {
@@ -321,7 +322,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         }
     }
     
-    private boolean isWhithinBounds(int newRow, int newCol) {
+    private boolean isWithinBounds(int newRow, int newCol) {
         return (newRow >= 0 && newRow < 8) && (newCol >= 0 && newCol < 8);
     }
     
@@ -331,20 +332,16 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         // torre já se moveu?
         if(king.hasMoved() || !canCastleKingSideRook(king)) {
             return false;
-        }
-               
+        }      
         // tem peças no caminho?
         for(int i = 1; i < 3; i++) {
             if(!board[king.getRow()][king.getCol()+i].isEmpty()) {
                 return false;
             }
         }
-        
         return true;
-        
         // trajetória do roque está sendo vigiada
         // rei está em cheque?
-        
     }
 
     public boolean canCastleQueenSide(King king) {
@@ -354,16 +351,13 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         if(king.hasMoved() || !canCastleQueenSideRook(king)) {
             return false;
         }
-               
         // tem peças no caminho?
         for(int i = 1; i < 4; i++) {
             if(!board[king.getRow()][king.getCol()-i].isEmpty()) {
                 return false;
             }
         }
-        
-        return true;
-        
+        return true;     
     }
     
     public boolean canCastleKingSideRook(King king) {
@@ -376,14 +370,113 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return p instanceof Rook && !p.hasMoved();
     }
     
+    public boolean isSquareUnderAttack(int row, int col) {
+        // OBS: considerar cor do "atacante"
+        // is attacked by rook or queen (lines)
+        if(isAttackedByRookOrQueen(row, col)) return true;
+        if(isAttackedByBishopOrQueen(row, col)) return true;
+        if(isAttackedByKnight(row, col)) return true;
+        if(isAttackedByPawn(row, col)) return true;
+        if(isAttackedByKing(row, col)) return true;
+        // is attacked by bishop or queen (diagonals)
+        // is attacked by knight (L moves)
+        // is attacked by pawn (one square diagonaly)
+        // is attacked by king (one square any direction)
+        
+        
+        return false;
+    }
+
+    private boolean isAttackedByRookOrQueen(int row, int col) {
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};      
+        for(int[] direction: directions) {
+            int newRow = row + direction[0];
+            int newCol = col + direction[1];
+            while(isWithinBounds(newRow, newCol)) {
+                Piece p = (Piece) board[newRow][newCol].getPiece();
+                if(p != null) {                  
+                    if(playingColor != p.color && (p instanceof Rook || p instanceof Queen)) {
+                        return true;
+                    }
+                    break;
+                }
+                newRow += direction[0];
+                newCol += direction[1];
+            }
+        }      
+        return false;
+    }
     
+    private boolean isAttackedByBishopOrQueen(int row, int col) {
+        int[][] directions = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};        
+        for(int[] direction: directions) {
+            int newRow = row + direction[0];
+            int newCol = col + direction[1];
+            while(isWithinBounds(newRow, newCol)) {
+                Piece p = (Piece) board[newRow][newCol].getPiece();
+                if(p != null) {                   
+                    if(playingColor != p.color && (p instanceof Bishop || p instanceof Queen)) {
+                        return true;
+                    }
+                    break;
+                }
+                newRow += direction[0];
+                newCol += direction[1];
+            }
+        } 
+        return false;
+    }
     
+    private boolean isAttackedByKnight(int row, int col) {
+        int[][] knightMoves = {
+            {2, 1}, {2, -1}, {-2, 1}, {-2, -1},
+            {1, 2}, {1, -2}, {-1, 2}, {-1, -2}
+        };      
+        for(int[] move: knightMoves) {
+            int newRow = row + move[0];
+            int newCol = col + move[1];         
+            if(isWithinBounds(newRow, newCol)) {
+                Piece p = (Piece) board[newRow][newCol].getPiece();
+                if(p != null && playingColor != p.color && p instanceof Knight) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isAttackedByPawn(int row, int col) {
+        int direction = playingColor == Color.WHITE ? -1: 1;
+        
+        int[][] pawnAttacks = {{direction, -1}, {direction, 1}};
+        for(int[] attack: pawnAttacks) {
+            int newRow = row + attack[0];
+            int newCol = col + attack[1];
+            
+            if(isWithinBounds(newRow, newCol)) {
+                Piece p = (Piece) board[newRow][newCol].getPiece();
+                if(p != null && playingColor != p.color && p instanceof Pawn) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }   
     
-    
-    
-    
-    
-    
+    private boolean isAttackedByKing(int row, int col) {
+        int[][] kingMoves = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+        for (int[] move : kingMoves) {
+            int newRow = row + move[0];
+            int newCol = col + move[1];
+            if (isWithinBounds(newRow, newCol)) {
+                Piece p = (Piece) board[newRow][newCol].getPiece();
+                if (p != null && playingColor != p.color && p instanceof King) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }   
     
     
     

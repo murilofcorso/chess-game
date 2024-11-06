@@ -8,7 +8,7 @@ public class ChessGame {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Chess Game");
         Board board = new Board();
-        ChessBoard canvas = new ChessBoard(board.board) {};
+        ChessBoard canvas = new ChessBoard(board.board) {}; 
         frame.add(canvas);
         frame.pack();
         frame.setVisible(true);
