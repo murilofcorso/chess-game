@@ -59,7 +59,6 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         drawPieces(g);
     }
     
-    
     private void drawPiece(Graphics g, Piece piece, int x, int y) {
         g.setColor(piece.color);
         g.fillOval(x + 10, y + 10, tileSize - 20, tileSize - 20);
@@ -180,6 +179,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         activePiece.move(posNew[0], posNew[1]);
         
         playing = activePiece.isWhite() ? Color.BLACK: Color.WHITE;
+        p.addMove();
     }
     
     public ArrayList<Square> getPawnMoves(Pawn pawn) {
@@ -325,7 +325,56 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return (newRow >= 0 && newRow < 8) && (newCol >= 0 && newCol < 8);
     }
     
+    public boolean canCastleKingSide(King king) {
+        // rei já se moveu?       
+        // tem a torre do rei?
+        // torre já se moveu?
+        if(king.hasMoved() || !canCastleKingSideRook(king)) {
+            return false;
+        }
+               
+        // tem peças no caminho?
+        for(int i = 1; i < 3; i++) {
+            if(!board[king.getRow()][king.getCol()+i].isEmpty()) {
+                return false;
+            }
+        }
+        
+        return true;
+        
+        // trajetória do roque está sendo vigiada
+        // rei está em cheque?
+        
+    }
+
+    public boolean canCastleQueenSide(King king) {
+        // rei já se moveu?       
+        // tem a torre do rei?
+        // torre já se moveu?
+        if(king.hasMoved() || !canCastleQueenSideRook(king)) {
+            return false;
+        }
+               
+        // tem peças no caminho?
+        for(int i = 1; i < 4; i++) {
+            if(!board[king.getRow()][king.getCol()-i].isEmpty()) {
+                return false;
+            }
+        }
+        
+        return true;
+        
+    }
     
+    public boolean canCastleKingSideRook(King king) {
+        Piece p = Utils.getPiece(board, king.getRow(), king.getCol()+3);
+        return p instanceof Rook && !p.hasMoved();
+    }
+    
+    public boolean canCastleQueenSideRook(King king) {
+        Piece p = Utils.getPiece(board, king.getRow(), king.getCol()-4);
+        return p instanceof Rook && !p.hasMoved();
+    }
     
     
     

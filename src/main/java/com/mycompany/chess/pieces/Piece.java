@@ -10,6 +10,7 @@ public class Piece {
     public final int id;
     private int row;
     private int col;
+    private int moves = 0;
     
     public Piece(String squareNotation, Color color, int id) {
         this.squareNotation = squareNotation;
@@ -35,5 +36,13 @@ public class Piece {
     
     public boolean isWhite() {
         return color == Color.WHITE;
+    }
+    
+    public boolean hasMoved() {
+        return moves > 0;
+    }
+    
+    public void addMove() {
+        moves += 1;
     }
 }
