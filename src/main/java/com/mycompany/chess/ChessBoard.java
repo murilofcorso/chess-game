@@ -96,9 +96,9 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
             activePiece = p;
         }
         
-        System.out.println(getVerticallyPinnedPieces());
-        System.out.println(getHorizontallyPinnedPieces());
-        System.out.println(getDiagonallyPinnedPieces());
+//        System.out.println(getVerticallyPinnedPieces());
+//        System.out.println(getHorizontallyPinnedPieces());
+//        System.out.println(getDiagonallyPinnedPieces());
     }
 
     @Override
@@ -184,7 +184,7 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     }
     
     public void movePiece(Piece p, int[] posOld, int[] posNew) {  
-        if(canMove(p)) {
+        if(canMove(p, posOld, posNew)) {
             board[posOld[0]][posOld[1]].setPiece(null);
             board[posNew[0]][posNew[1]].setPiece(p);
             p.move(posNew[0], posNew[1]);
@@ -615,8 +615,33 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return null;
     }    
     
-    private boolean canMove(Piece p) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    private boolean canMove(Piece p, int[] posOld, int[] posNew) { 
+        if(getDiagonallyPinnedPieces().contains(p)) {
+            int pinnedPieceRow = posOld[0];
+            int pinnedPieceCol = posOld[1];
+            
+            King k = getPlayingSideKing();
+            
+            int kingRow = k.getRow();
+            int kingCol = k.getCol();
+            
+            if(pinnedPieceRow - kingRow == pinnedPieceCol - kingCol) {
+                return pinnedPieceRow - posNew[0] == pinnedPieceCol - posNew[1];
+            } 
+            else {
+                return pinnedPieceRow - posNew[0] == -1*(pinnedPieceCol - posNew[1]);
+            }
+        }
+        
+        if(getVerticallyPinnedPieces().contains(p)) {
+            return posOld[1] == posNew[1];
+        }
+        
+        if(getHorizontallyPinnedPieces().contains(p)) {
+            return posOld[0] == posNew[0];
+        }
+        
+        return true;
     }
     
     
