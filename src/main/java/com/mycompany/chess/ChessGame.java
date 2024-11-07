@@ -17,7 +17,6 @@ public class ChessGame {
         for(int i = 0; i < board.board.length; i++) {
             for(int j = 0; j < board.board.length; j++) { 
                 Piece p = (Piece) board.board[i][j].getPiece();
-//                System.out.print(board.board[i][j].notation);
                 if(p != null) {
                     System.out.print(p.squareNotation);  
                 }

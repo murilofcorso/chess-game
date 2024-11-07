@@ -95,6 +95,10 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         if(p != null && p.color == playingColor) {
             activePiece = p;
         }
+        
+        System.out.println(getVerticallyPinnedPieces());
+        System.out.println(getHorizontallyPinnedPieces());
+        System.out.println(getDiagonallyPinnedPieces());
     }
 
     @Override
@@ -125,42 +129,40 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
     private void checkMoves(MouseEvent e, Piece p) {
         int oldRow = p.getRow();
         int oldCol = p.getCol();
-        String notationOld = Utils.convertToChessNotation(oldRow, oldCol);
         
         int newRow = e.getY()/tileSize;
         int newCol = e.getX()/tileSize;
-        String notationNew = Utils.convertToChessNotation(newRow, newCol);
         
         
         switch (p) {
             case Pawn pawn -> {
                 if(getPawnMoves(pawn).contains(board[newRow][newCol])) {
-                    movePiece(p, notationOld, notationNew);
+                    movePiece(p, new int[] {oldRow, oldCol}, new int[] {newRow, newCol});
                 }
             }
             case Bishop bishop -> {
                 if(getBishopMoves(bishop).contains(board[newRow][newCol])) {
-                    movePiece(p, notationOld, notationNew);
+                    movePiece(p, new int[] {oldRow, oldCol}, new int[] {newRow, newCol});
                 }
             }
             case Knight knight -> {
                 if(getKnightMoves(knight).contains(board[newRow][newCol])) {
-                    movePiece(p, notationOld, notationNew);
+                    movePiece(p, new int[] {oldRow, oldCol}, new int[] {newRow, newCol});
                 }
             }
             case Rook rook -> {
                 if(getRookMoves(rook).contains(board[newRow][newCol])) {
-                    movePiece(p, notationOld, notationNew);
+                    movePiece(p, new int[] {oldRow, oldCol}, new int[] {newRow, newCol});
                 }
             }
             case Queen queen -> {
                 if(getQueenMoves(queen).contains(board[newRow][newCol])) {
-                    movePiece(p, notationOld, notationNew);
+                    movePiece(p, new int[] {oldRow, oldCol}, new int[] {newRow, newCol});
                 }
             }
             case King king -> {
                 if(getKingMoves(king).contains(board[newRow][newCol])) {
-                    movePiece(p, notationOld, notationNew);
+                    movePiece(p, new int[] {oldRow, oldCol}, new int[] {newRow, newCol});
                 }
                 if(newCol - oldCol == 2 && canCastleKingSide(king)) {
                     movePiece(p, new int[]{oldRow, oldCol}, new int[]{newRow, newCol});
@@ -181,28 +183,17 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         repaint();
     }
     
-    public void movePiece(Piece p, String notationOld, String notationNew) {
-        int[] posOld = Utils.convertFromChessNotation(notationOld);
-        int[] posNew = Utils.convertFromChessNotation(notationNew);
-        
-        board[posOld[0]][posOld[1]].setPiece(null);
-        board[posNew[0]][posNew[1]].setPiece(p);
-        p.move(posNew[0], posNew[1]);
-
-        playingColor = activePiece.isWhite() ? Color.BLACK: Color.WHITE;     
-        p.addMove(); 
-    }
-    
     public void movePiece(Piece p, int[] posOld, int[] posNew) {  
-        board[posOld[0]][posOld[1]].setPiece(null);
-        board[posNew[0]][posNew[1]].setPiece(p);
-        p.move(posNew[0], posNew[1]);
+        if(canMove(p)) {
+            board[posOld[0]][posOld[1]].setPiece(null);
+            board[posNew[0]][posNew[1]].setPiece(p);
+            p.move(posNew[0], posNew[1]);
 
-        playingColor = activePiece.isWhite() ? Color.BLACK: Color.WHITE;     
-        p.addMove(); 
+            playingColor = activePiece.isWhite() ? Color.BLACK: Color.WHITE;     
+            p.addMove();
+        }  
     }
-    
-    
+
     public ArrayList<Square> getPawnMoves(Pawn pawn) {
         ArrayList<Square> moves = new ArrayList<>();
         int direction = pawn.isWhite() ? -1 : 1;
@@ -492,20 +483,141 @@ public class ChessBoard extends JPanel implements MouseListener, MouseMotionList
         return false;
     }   
     
+    private ArrayList<Piece> getVerticallyPinnedPieces() {
+        ArrayList<Piece> pieces = new ArrayList<>();
+        King k = getPlayingSideKing();
+        
+        int kingRow = k.getRow();
+        int kingCol = k.getCol();
+        
+        int[][] lineDirections = {
+            {1, 0}, {-1, 0}
+        };
+        
+        for(int[] direction: lineDirections) {
+            Piece pinnedPiece = null;
+            
+            int newRow = kingRow + direction[0];
+            int newCol = kingCol + direction[1];
+            
+            while(isWithinBounds(newRow, newCol)) {
+                Piece p = Utils.getPiece(board, newRow, newCol);
+                if(p != null) {
+                    if(p.color == playingColor) {
+                        if(pinnedPiece != null) {
+                            break;
+                        } 
+                        pinnedPiece = p;
+                    }
+                    if(p.color != playingColor && (p instanceof Queen || p instanceof Rook)) {
+                        if(pinnedPiece != null) {
+                            pieces.add(pinnedPiece);
+                        }
+                        break;
+                    }
+                }
+                newRow += direction[0];
+                newCol += direction[1];
+            }
+        }
+        return pieces;
+    }
     
+    private ArrayList<Piece> getHorizontallyPinnedPieces() {
+        ArrayList<Piece> pieces = new ArrayList<>();
+        King k = getPlayingSideKing();
+        
+        int kingRow = k.getRow();
+        int kingCol = k.getCol();
+        
+        int[][] lineDirections = {
+            {0, 1}, {0, -1}
+        };
+        
+        for(int[] direction: lineDirections) {
+            Piece pinnedPiece = null;
+            
+            int newRow = kingRow + direction[0];
+            int newCol = kingCol + direction[1];
+            
+            while(isWithinBounds(newRow, newCol)) {
+                Piece p = Utils.getPiece(board, newRow, newCol);
+                if(p != null) {
+                    if(p.color == playingColor) {
+                        if(pinnedPiece != null) {
+                            break;
+                        } 
+                        pinnedPiece = p;
+                    }
+                    if(p.color != playingColor && (p instanceof Queen || p instanceof Rook)) {
+                        if(pinnedPiece != null) {
+                            pieces.add(pinnedPiece);
+                        }
+                        break;
+                    }
+                }
+                newRow += direction[0];
+                newCol += direction[1];
+            }
+        }
+        return pieces;
+    }
     
+    private ArrayList<Piece> getDiagonallyPinnedPieces() {
+        ArrayList<Piece> pieces = new ArrayList<>();
+        King k = getPlayingSideKing();
+        
+        int kingRow = k.getRow();
+        int kingCol = k.getCol();
+        
+        int[][] lineDirections = {
+            {1, 1}, {-1, -1}, {1, -1}, {-1, 1}
+        };
+        
+        for(int[] direction: lineDirections) {
+            Piece pinnedPiece = null;
+            
+            int newRow = kingRow + direction[0];
+            int newCol = kingCol + direction[1];
+            
+            while(isWithinBounds(newRow, newCol)) {
+                Piece p = Utils.getPiece(board, newRow, newCol);
+                if(p != null) {
+                    if(p.color == playingColor) {
+                        if(pinnedPiece != null) {
+                            break;
+                        } 
+                        pinnedPiece = p; 
+                    }
+                    if(p.color != playingColor && (p instanceof Queen || p instanceof Bishop)) {
+                        if(pinnedPiece != null) {
+                            pieces.add(pinnedPiece);
+                        }
+                        break;
+                    }
+                }
+                newRow += direction[0];
+                newCol += direction[1];
+            }
+        }
+        return pieces;
+    }   
+
+    private King getPlayingSideKing() {
+        for(Square[] row: board) {
+            for(Square s: row) {
+                Piece p = (Piece) s.getPiece();
+                if(p instanceof King && p.color == playingColor) {
+                    return (King) p;
+                }
+            }
+        }
+        return null;
+    }    
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+    private boolean canMove(Piece p) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
     
     
     
